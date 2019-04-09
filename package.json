@@ -1,0 +1,26 @@
+{
+  "name": "nodeapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kanigoski/Senai2019-03.git"
+  },
+  "author": "Richard",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kanigoski/Senai2019-03/issues"
+  },
+  "homepage": "https://github.com/kanigoski/Senai2019-03#readme",
+  "devDependencies": {
+    "typescript": "^3.4.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.16.4"
+  }
+}
