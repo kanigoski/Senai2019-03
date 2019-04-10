@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kanigoski/Senai2019-03#readme",
   "devDependencies": {
+    "@types/node": "^11.13.2",
     "typescript": "^3.4.2"
   },
   "dependencies": {
