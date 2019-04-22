@@ -9,6 +9,52 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extend: true }));
 
 const port: number = 3000;
+let users: any[] = [];
+
+app.post('/logon', function (req, res) {
+    let searchUser = {};
+
+    users.map(i => {
+        if (i.userName == req.body.userName && i.password == req.body.password) {
+            searchUser = {
+                response: 200,
+                userName: i.name
+            };
+        }
+    });
+
+    if (Object.keys(searchUser).length === 0) {
+        searchUser = {
+            response: 404,
+            message: "Usuário ou senha incorreto!"
+        }
+    }
+
+    res.send(searchUser);
+});
+
+app.put('/create', function (req, res) {
+    let newUser = {};
+
+    users.map(i => {
+        if (i.userName == req.body.userName) {
+            newUser = {
+                response: 400,
+                message: "Usuário já existe!"
+            };
+        }
+    });
+    if (Object.keys(newUser).length === 0) {
+        newUser = { "response": 201, "message": "Usuário criado com sucesso!" }
+        users.push({
+            userName: req.body.userName,
+            password: req.body.password,
+            name: req.body.name,
+        });
+    };
+
+    res.send(newUser);
+})
 
 app.get('/cidades', function (req, res) {
     res.send([
@@ -32,7 +78,7 @@ app.get('/cidades', function (req, res) {
 });
 
 app.get('/bairros/:id', function (req, res) {
-    const list: any[] = []; 
+    const list: any[] = [];
     const values = [
         {
             "id": 1,
@@ -70,5 +116,5 @@ app.get('/bairros/:id', function (req, res) {
 });
 
 app.listen(port, function () {
-console.log(`Example app listening on port ${port}!`);
+    console.log(`Example app listening on port ${port}!`);
 });

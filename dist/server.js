@@ -8,6 +8,46 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extend: true }));
 var port = 3000;
+var users = [];
+app.post('/logon', function (req, res) {
+    var searchUser = {};
+    users.map(function (i) {
+        if (i.userName == req.body.userName && i.password == req.body.password) {
+            searchUser = {
+                response: 200,
+                userName: i.name
+            };
+        }
+    });
+    if (Object.keys(searchUser).length === 0) {
+        searchUser = {
+            response: 404,
+            message: "Usuário ou senha incorreto!"
+        };
+    }
+    res.send(searchUser);
+});
+app.put('/create', function (req, res) {
+    var newUser = {};
+    users.map(function (i) {
+        if (i.userName == req.body.userName) {
+            newUser = {
+                response: 400,
+                message: "Usuário já existe!"
+            };
+        }
+    });
+    if (Object.keys(newUser).length === 0) {
+        newUser = { "response": 201, "message": "Usuário criado com sucesso!" };
+        users.push({
+            userName: req.body.userName,
+            password: req.body.password,
+            name: req.body.name,
+        });
+    }
+    ;
+    res.send(newUser);
+});
 app.get('/cidades', function (req, res) {
     res.send([
         {
