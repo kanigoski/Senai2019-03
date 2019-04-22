@@ -3,12 +3,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var cors = require("cors");
 var bodyParser = require("body-parser");
+var mysql = require('mysql');
 var app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extend: true }));
 var port = 3000;
 var users = [];
+var connection = mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: '',
+    database: 'Aula2019'
+});
+function execSQLQuery(sqlQry, res) {
+    connection.query(sqlQry, function (error, results, fields) {
+        if (error) {
+            res.json({ error: error });
+        }
+        else {
+            res.json({ response: 200, message: 'Usuário criado com sucesso!' });
+        }
+        connection.end();
+    });
+}
 app.post('/logon', function (req, res) {
     var searchUser = {};
     users.map(function (i) {
@@ -28,80 +47,15 @@ app.post('/logon', function (req, res) {
     res.send(searchUser);
 });
 app.put('/create', function (req, res) {
-    var newUser = {};
-    users.map(function (i) {
-        if (i.userName == req.body.userName) {
-            newUser = {
-                response: 400,
-                message: "Usuário já existe!"
-            };
-        }
-    });
-    if (Object.keys(newUser).length === 0) {
-        newUser = { "response": 201, "message": "Usuário criado com sucesso!" };
-        users.push({
-            userName: req.body.userName,
-            password: req.body.password,
-            name: req.body.name,
-        });
-    }
-    ;
-    res.send(newUser);
+    var sSQL = "\n        INSERT INTO usuario (nome, usuario, senha) VALUES\n        ('" + req.body.name + "', '" + req.body.userName + "', '" + req.body.password + "')\n    ";
+    execSQLQuery(sSQL, res);
 });
 app.get('/cidades', function (req, res) {
-    res.send([
-        {
-            "id": 1,
-            "name": "Jaraguá do Sul"
-        },
-        {
-            "id": 2,
-            "name": "Joinville"
-        },
-        {
-            "id": 3,
-            "name": "Blumenau"
-        },
-        {
-            "id": 4,
-            "name": "Pomerode"
-        },
-    ]);
+    execSQLQuery('SELECT * FROM cidade', res);
 });
 app.get('/bairros/:id', function (req, res) {
-    var list = [];
-    var values = [
-        {
-            "id": 1,
-            "codCidade": 1,
-            "name": "Jaraguá 99",
-            "value": 1.5
-        },
-        {
-            "id": 2,
-            "codCidade": 1,
-            "name": "Bairro 2",
-            "value": 2.5
-        },
-        {
-            "id": 3,
-            "codCidade": 2,
-            "name": "Teste 1",
-            "value": 3.5
-        },
-        {
-            "id": 4,
-            "codCidade": 2,
-            "name": "Teste 2",
-            "value": 4.5
-        }
-    ];
-    values.map(function (i) {
-        if (i.codCidade == req.params.id) {
-            list.push(i);
-        }
-    });
-    res.send(list);
+    var sSQL = "\n        SELECT \n            bairro.nome AS nomeBairro,\n            cidade.nome AS nomeCidade\n        FROM bairro \n            INNER JOIN cidade\n                ON cidade.id_cidade = bairro.id_cidade\n        WHERE cidade.id_cidade = " + req.params.id + "\n        ";
+    execSQLQuery(sSQL, res);
 });
 app.listen(port, function () {
     console.log("Example app listening on port " + port + "!");

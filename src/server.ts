@@ -1,6 +1,7 @@
 import express = require("express");
 var cors = require("cors");
 var bodyParser = require("body-parser");
+const mysql = require('mysql');
 
 const app: express.Application = express();
 
@@ -10,6 +11,25 @@ app.use(bodyParser.urlencoded({ extend: true }));
 
 const port: number = 3000;
 let users: any[] = [];
+
+const connection = mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: '',
+    database: 'Aula2019'
+});
+
+function execSQLQuery(sqlQry, res){   
+    connection.query(sqlQry, function(error, results, fields){
+        if(error) {
+            res.json({error});
+        } else {
+            res.json(results);
+        }
+        connection.end();
+    });
+}
 
 app.post('/logon', function (req, res) {
     let searchUser = {};
@@ -34,85 +54,30 @@ app.post('/logon', function (req, res) {
 });
 
 app.put('/create', function (req, res) {
-    let newUser = {};
-
-    users.map(i => {
-        if (i.userName == req.body.userName) {
-            newUser = {
-                response: 400,
-                message: "Usuário já existe!"
-            };
-        }
-    });
-    if (Object.keys(newUser).length === 0) {
-        newUser = { "response": 201, "message": "Usuário criado com sucesso!" }
-        users.push({
-            userName: req.body.userName,
-            password: req.body.password,
-            name: req.body.name,
-        });
-    };
-
-    res.send(newUser);
+    const sSQL = 
+    `
+        INSERT INTO usuario (nome, usuario, senha) VALUES
+        ('${req.body.name}', '${req.body.userName}', '${req.body.password}')
+    `
+    execSQLQuery(sSQL, res)
 })
 
 app.get('/cidades', function (req, res) {
-    res.send([
-        {
-            "id": 1,
-            "name": "Jaraguá do Sul"
-        },
-        {
-            "id": 2,
-            "name": "Joinville"
-        },
-        {
-            "id": 3,
-            "name": "Blumenau"
-        },
-        {
-            "id": 4,
-            "name": "Pomerode"
-        },
-    ]);
+    execSQLQuery('SELECT * FROM cidade', res);
 });
 
 app.get('/bairros/:id', function (req, res) {
-    const list: any[] = [];
-    const values = [
-        {
-            "id": 1,
-            "codCidade": 1,
-            "name": "Jaraguá 99",
-            "value": 1.5
-        },
-        {
-            "id": 2,
-            "codCidade": 1,
-            "name": "Bairro 2",
-            "value": 2.5
-        },
-        {
-            "id": 3,
-            "codCidade": 2,
-            "name": "Teste 1",
-            "value": 3.5
-        },
-        {
-            "id": 4,
-            "codCidade": 2,
-            "name": "Teste 2",
-            "value": 4.5
-        }
-    ];
-
-    values.map(i => {
-        if (i.codCidade == req.params.id) {
-            list.push(i);
-        }
-    });
-
-    res.send(list);
+    const sSQL =
+        `
+        SELECT 
+            bairro.nome AS nomeBairro,
+            cidade.nome AS nomeCidade
+        FROM bairro 
+            INNER JOIN cidade
+                ON cidade.id_cidade = bairro.id_cidade
+        WHERE cidade.id_cidade = ${req.params.id}
+        `
+    execSQLQuery(sSQL, res);
 });
 
 app.listen(port, function () {
