@@ -10,24 +10,35 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extend: true }));
 var port = 3000;
 var users = [];
-var connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: '',
-    database: 'Aula2019'
-});
 function execSQLQuery(sqlQry, res) {
+    var connection = mysql.createConnection({
+        host: 'localhost',
+        port: 3306,
+        user: 'root',
+        password: '',
+        database: 'prova'
+    });
     connection.query(sqlQry, function (error, results, fields) {
-        if (error) {
-            res.json({ error: error });
-        }
-        else {
-            res.json({ response: 200, message: 'Usuário criado com sucesso!' });
-        }
+        if (error)
+            res.json(error);
+        else
+            res.json(results);
         connection.end();
+        console.log('executou!');
     });
 }
+app.put('/sabor', function (req, res) {
+    var sSQL = "INSERT INTO sabor (id_tamanho, descricao, preco) VALUES\n        ('" + req.body.id_tamanho + "', '" + req.body.descricao + "', " + req.body.preco + ")";
+    console.log(sSQL);
+    execSQLQuery(sSQL, res);
+});
+app.get('/sabor/:id', function (req, res) {
+    execSQLQuery("SELECT\n                    tamanho.descricao AS tamanho,\n                    sabor.descricao AS sabor,\n                    sabor.preco \n                FROM sabor\n                    INNER JOIN tamanho\n                        ON tamanho.id_tamanho = sabor.id_tamanho\n                WHERE tamanho.id_tamanho = " + req.params.id + "\n                ", res);
+});
+app.get('/tamanho', function (req, res) {
+    execSQLQuery("SELECT\n                    tamanho.id_tamanho AS codTamanho,\n                    tamanho.descricao AS tamanho\n                FROM tamanho\n                ", res);
+});
+//--------------------------------------------------------------------------------------------------
 app.post('/logon', function (req, res) {
     var searchUser = {};
     users.map(function (i) {
